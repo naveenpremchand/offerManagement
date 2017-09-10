@@ -1,0 +1,22 @@
+{% extends "password_reset/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="page-header">
+   <h1>Password Reset</h1>
+</div>
+
+	{% if invalid %}{% url "password_reset_recover" as recovery_url %}
+		<p>{% blocktrans %}Sorry, this password reset link is invalid. You can still <a href="{{ recovery_url }}">request a new one</a>.{% endblocktrans %}</p>
+	{% else %}
+		<p>{% blocktrans %}Hi, <strong>{{ username }}</strong>. Please choose your new password.{% endblocktrans %}</p>
+		<form method="post" action="{% url "password_reset_reset" token %}">
+			{% csrf_token %}
+			{% include 'includes/new_form.html' %}
+		<div class="modal-footer">
+        	<button class="btn btn-primary" id="modal-submit">Set new password</button>
+        	<a href="{% url 'unityapp.home' %}" class="btn">Cancel</a>
+    	</div>
+		</form>
+	{% endif %}
+{% endblock %}

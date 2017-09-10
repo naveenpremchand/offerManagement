@@ -1,0 +1,74 @@
+  {% csrf_token %}
+    <style>
+        #id_group{
+          height:100px!important;
+        }
+        #cke_id_description{
+          width:554px!important;
+        }
+    </style>
+    {% for field in form.visible_fields %}
+    {% if forloop.first %}
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-error"><a class="close" data-dismiss="alert">&times;</a> {{ error }} </div>
+        {% endfor %}
+    {% endif %}
+    {% if forloop.first %}
+    <div class="row">
+    {% endif %}
+    <div class="col-lg-6 asst-add-frm" >
+        <label>
+            {{ field.label }}
+            {% if field.field.required %}<sup>*</sup>{% endif %}
+        </label>
+        {{ field }}
+      
+      <!--{% if field.label == 'Date of Purchase'%}
+        <span class="asst-date"><i class="glyphicon glyphicon-calendar"></i></span>
+      {% endif %}-->
+      {% for err in field.errors %}
+          <span class="help-inline" style="color:red">{{ err }}</span>
+      {% endfor %}
+      <p class="help-block">{{ field.help_text }}</p>
+    </div>
+    {% if forloop.counter|divisibleby:2 or forloop.last %}
+      </div><div class="row">
+    {% endif %}
+  {% endfor %} 
+  
+{{ choice_formset.management_form }}
+
+<div class="control-group {% if field.errors %}error{% endif %}">
+{% for form in choice_formset.forms %}
+ {{ form.id }} 
+   {% for field in form.visible_fields %}
+      {% if field.label != 'Delete' %}
+      <label class="control-label" for="{{ field.name }}" style="text-align:left;padding-left:15px;">
+       {{ field.label }} {{ forloop.parentloop.counter }}
+       {% if field.field.required %}<span class="required">*</span>{% endif %}
+      </label>
+      <div class="controls">
+       {{ field }}
+       {% if forloop.parentloop.counter > 2 %}
+       <!--&nbsp;<input type="checkbox" id="id_choices_set-{{forloop.parentloop.counter|add:'-1'}}-DELETE" name="choices_set-{{forloop.parentloop.counter|add:'-1'}}-DELETE" title="Delete answer">-->
+       &nbsp;<img id="id_choices_set-{{forloop.parentloop.counter|add:'-1'}}-DELETE" name="choices_set-{{forloop.parentloop.counter|add:'-1'}}-DELETE" style="width:15px;height:15px;cursor:pointer;" src="{{STATIC_URL}}img/delete.png" onclick="deleteOption({{forloop.parentloop.counter|add:'-1'}});" title="Delete Option">&nbsp;Click here to delete this option
+       {% endif %}
+       {% for err in field.errors %}
+         <span class="help-inline">{{ err }}</span>
+       {% endfor %}
+       <p class="help-block">{{ field.help_text }}</p>
+      </div>
+      {% endif %}
+   {% endfor %}
+{% endfor %}
+</div>
+
+<span style="color:grey;"><a class="view" href="javascript:void(0);" id="add_more"><img src="{{STATIC_URL}}img/plus.png" style="cursor:pointer;padding-left:65px;" title="Add More Options"></a>&nbsp;Click here to add more options</span>
+{% for hidden in form.hidden_fields %}
+    {{ hidden }}
+{% endfor %}
+<span class="help-inline">{{ choice_formset.non_form_errors }}</span>
+<!-- {% for error in choice_formset.errors %}
+  {{ error }}
+{% endfor %}
+ -->

@@ -1,0 +1,29 @@
+  {% csrf_token %}
+    {% for field in form.visible_fields %}
+    {% if forloop.first %}
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-error"><a class="close" data-dismiss="alert">&times;</a> {{ error }} </div>
+        {% endfor %}
+    {% endif %}
+    {% if forloop.first %}
+    <div class="row">
+    {% endif %}
+    <div class="col-lg-5 asst-add-frm" >
+        <label>
+            {{ field.label }}
+            {% if field.field.required %}<sup>*</sup>{% endif %}
+        </label>
+        {{ field }}
+      
+      <!--{% if field.label == 'Date of Purchase'%}
+        <span class="asst-date"><i class="glyphicon glyphicon-calendar"></i></span>
+      {% endif %}-->
+      {% for err in field.errors %}
+          <span class="help-inline">{{ err }}</span>
+      {% endfor %}
+      <p class="help-block">{{ field.help_text }}</p>
+    </div>
+    {% if forloop.counter|divisibleby:2 or forloop.last %}
+      </div><div class="row">
+    {% endif %}
+  {% endfor %} 
