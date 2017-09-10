@@ -1,0 +1,27 @@
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header"><h3>Edit Purchase Quotation Vendors</h3></div>
+<div class="modal-body">
+    {% if success %}
+        <div class="alert alert-success">
+            Purchase Quotation edited successfully
+        </div>
+    {% else %}
+        <form method="post" action="" enctype="multipart/form-data" class="form-horizontal" id="modal-form">
+            {% include 'includes/new_form.html' %}
+        </form>
+    {% endif %}
+</div>
+{% if success %}
+    <div class="modal-footer">
+        <button class="btn" id="modal-close">Close</button>
+    </div>
+{% else %}
+    <div class="modal-footer">
+        <button class="btn btn-primary" id="modal-submit">Update</button>
+        <button class="btn" id="modal-close">Close</button>
+    </div>
+{% endif %}
+</div>
+</div>
+

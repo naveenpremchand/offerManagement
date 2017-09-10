@@ -1,0 +1,141 @@
+{% extends "layout-app-new.html" %}
+{% load utils %}
+{% load mathtag %}
+
+{% block breadcrumb %}
+    {% load breadcrumb_tags %}
+    {% clear_crumb %}
+    {% add_crumb 'Vendor' %}
+    {% add_crumb 'Purchase Quotation List' 'unityapp.vendor_book_list' %}
+    {% render_breadcrumbs %}
+{% endblock %}
+{% block content %}
+   <style type="text/css">
+    .tabSize{
+        width: 60%!important;
+    }
+    .help-inline, .help-block{
+        color:red!important;
+    }
+    .alert-error{
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+        color: red;
+    }
+    .errorlist{
+        display: none;
+    }
+    </style>
+    <link href="{{STATIC_URL}}css/style.css" rel="stylesheet">
+    <link type="text/css" href="{{STATIC_URL}}css/jquery.jscrollpane.css" rel="stylesheet" media="all" />
+
+    <div class="page-header">
+        <div class="alert alert-error" style="display:none;">
+            <a class="close" data-dismiss="alert">×</a>
+            <span class="errormsg"></span>
+        </div>
+        <h1>Purchase Quotation Order
+        </h1>
+    </div>
+    <style>
+     ul {
+        list-style-type:none
+      }
+
+     .btnVendor { 
+          color:#050; 
+          font: bold 84% 'trebuchet ms',helvetica,sans-serif; 
+          background-color:#fed; 
+          border:1px solid; 
+          border-color: #696 #363 #363 #696; 
+        } 
+
+    .btnVendor2 { 
+          color:#050; 
+          font: bold 84% 'trebuchet ms',helvetica,sans-serif; 
+          background-color:#00FFFF; 
+          border:1px solid; 
+          border-color: #696 #363 #363 #696; 
+        }
+
+    .purchase-request a{
+      color: #fff!important;
+    }    
+    </style>
+
+    <link href="{{STATIC_URL}}css/style.css" rel="stylesheet">
+    <div class="col-lg-3">
+              <ul id="asset-category-list">
+                <li class="asst-filtr" style="background-color: #0795fe;"><i class="glyphicon glyphicon-th"></i>Filter</li>
+                <li class="panel" value="1"><a href="/purchase_quotation_order/list?category=undelivered"><i class="glyphicon glyphicon-menu-right"></i>Undelivered</a></li>
+                <li class="panel" value="2"><a href="/purchase_quotation_order/list?category=delivered"><i class="glyphicon glyphicon-menu-right"></i>Delivered</a></li>
+              </ul>
+    </div>
+
+     <div id="asset-list" class="col-lg-9">
+    {% load endless %}
+    {% paginate 20 object_list %}
+    
+        {% if object_list.count %}
+            <table class="table table-bordered table-striped" width="100%">
+                <thead style="background-color: #0795fe;" class="purchase-request">
+                  <th>Number</th>
+                  <th>Vendor Name</th>
+                  <th>Item</th>
+                  <th>Quantity</th>
+                  <th>Quotation Amount</th>
+                  <th> </th>
+                </thead>
+                <tbody>
+                {% for obj in object_list %}
+                    <tr>
+                        <td width="10%">{{obj.number}}</td>
+                        <td width="10%">
+                        {% with obj.purchase_request|get_the_choosen_vendor_detail as detail %}
+                        {{detail.vendor.name}}
+                        {% endwith %}
+                        </td>
+                        <td width="10%">{{obj.purchase_request.item_name}}
+                        </td>
+                         <td align="right" width="10%">{{obj.purchase_request.quantity}}</td>
+                        <td align="right" width="10%">
+                        {% with obj.purchase_request|get_the_choosen_vendor_detail as detail %}
+                        {{detail.quotation_amount}}
+                        {% endwith %}
+                        </td>
+                       
+                        <td width="20%">
+                            <span title="View Expense">
+                              <a  href="{% url 'unityapp.purchase_quotation_view' obj.purchase_request.id %}" data-toggle="tooltip" data-placement="bottom" title="View Quotation Details"><i class="glyphicon glyphicon-zoom-in ico-sttng"></i></a>
+                            </span>
+                            {% if not obj.delivered %}
+                            &nbsp;
+                            <span title="View Expense">
+                              <a  href="{% url 'unityapp.vendor_book_create_purchase_quotation' obj.id %}" data-toggle="tooltip" data-placement="bottom" title="Book Expense"><i class="glyphicon glyphicon-new-window"></i></a>
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% show_pages %}
+        {% else %}
+            No results.
+        {% endif %}
+
+    </div>
+
+
+    <script type="text/javascript">
+        var selected = "{{category}}"
+        $('#asset-category-list li').each(function(){
+         if($(this).val() == parseInt(selected)){
+            $(this).addClass('active');
+         }
+       });
+    </script>
+
+{% endblock %}
+
+

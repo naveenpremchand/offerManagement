@@ -1,0 +1,167 @@
+{% extends "layout-app-new.html" %}
+{% load utils %}
+{% load mathtag %}
+
+{% block breadcrumb %}
+    {% load breadcrumb_tags %}
+    {% clear_crumb %}
+    {% add_crumb 'Vendor' %}
+    {% add_crumb 'Purchase Quotation List' 'unityapp.vendor_book_list' %}
+    {% render_breadcrumbs %}
+{% endblock %}
+{% block content %}
+   <style type="text/css">
+    .tabSize{
+        width: 60%!important;
+    }
+    .help-inline, .help-block{
+        color:red!important;
+    }
+    .alert-error{
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+        color: red;
+    }
+    .errorlist{
+        display: none;
+    }
+    </style>
+    <link href="{{STATIC_URL}}css/style.css" rel="stylesheet">
+    <link type="text/css" href="{{STATIC_URL}}css/jquery.jscrollpane.css" rel="stylesheet" media="all" />
+
+    <div class="page-header">
+        <div class="alert alert-error" style="display:none;">
+            <a class="close" data-dismiss="alert">×</a>
+            <span class="errormsg"></span>
+        </div>
+        <h1>Purchase Quotation List{% if request.user|check_vendor_quotation_create %}<a href="{% url 'unityapp.purchase_quotation_request' %}" class="btn btn-primary pull-right">Create Purchase Quotation</a>{% endif %}
+        </h1>
+    </div>
+    <style>
+     ul {
+        list-style-type:none
+      }
+
+     .btnVendor { 
+          color:#050; 
+          font: bold 84% 'trebuchet ms',helvetica,sans-serif; 
+          background-color:#fed; 
+          border:1px solid; 
+          border-color: #696 #363 #363 #696; 
+        } 
+
+    .btnVendor2 { 
+          color:#050; 
+          font: bold 84% 'trebuchet ms',helvetica,sans-serif; 
+          background-color:#00FFFF; 
+          border:1px solid; 
+          border-color: #696 #363 #363 #696; 
+        }
+
+    .purchase-request a{
+      color: #fff!important;
+    } 
+       
+    </style>
+    <link href="{{STATIC_URL}}css/style.css" rel="stylesheet">
+    <div class="col-lg-3">
+              <ul id="asset-category-list">
+                <li class="asst-filtr" style="background-color: #0795fe;"><i class="glyphicon glyphicon-th"></i>Filter</li>
+                 
+                <li class="panel" value="1"><a href="/purchase-quotation/list?category=pending"><i class="glyphicon glyphicon-menu-right"></i>Pending</a></li>
+                <li class="panel" value="2"><a href="/purchase-quotation/list?category=escalated"><i class="glyphicon glyphicon-menu-right"></i>Escalated</a></li>
+                <li class="panel" value="3"><a href="/purchase-quotation/list?category=approved"><i class="glyphicon glyphicon-menu-right"></i>Approved</a></li>
+               
+              </ul>
+    </div>
+
+     <div id="asset-list" class="col-lg-9">
+    {% load endless %}
+    {% paginate 20 objects %}
+    
+        {% if objects.count %}
+            
+            <table class="table table-bordered table-striped" width="100%">
+                <thead style="background-color: #0795fe;" class="purchase-request">
+                 {{ sorter.as_table }}
+                </thead>
+                <tbody>
+                {% for obj in objects %}
+                    <tr>
+                        <td width="10%">{{obj.number}}</td>
+                        <td width="10%">{{obj.item_name}}</td>
+                        <td width="10%">{{obj.quantity}}</td>
+                        <td width="10%">{{obj.required_date}}</td>
+                        <td align="right" width="10%">{{obj.expence_account.name}}</td>
+                         <td align="right" width="10%">{{obj.escalation_level}}</td>
+                        <td width="20%">
+                            <span title="View Expense">
+                              <a  href="{% url 'unityapp.purchase_quotation_view' obj.id %}" data-toggle="tooltip" data-placement="bottom" title="View Booking Details"><i class="glyphicon glyphicon-zoom-in ico-sttng"></i></a>
+                            </span>
+                            {% if request.user|check_vendor_quotation_create and obj.escalation_level == '0' %}
+                            &nbsp;
+                            <span title="Edit Expense">
+                              <a href="{% url 'unityapp.purchase_quotation_update' obj.id %}" data-toggle="tooltip" data-placement="bottom" title="Edit Expense"><i class="glyphicon glyphicon-pencil ico-edit"></i></a>
+                            </span>
+                            &nbsp;
+                             <span title="Edit Expense">
+                              <a href="javascript:escalateOrder({{obj.id}});" data-toggle="tooltip" data-placement="bottom" title="Escalate"><i class="glyphicon glyphicon-tasks"></i></a>
+                            </span>
+                            &nbsp;
+                             <span title="Edit Expense">
+                              <a href="javascript:deleteVendorBook({{obj.id}});" data-toggle="tooltip" data-placement="bottom" title="Escalate"><i class="glyphicon glyphicon-trash"></i></a>
+                            </span>
+
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% show_pages %}
+        {% else %}
+            No results.
+        {% endif %}
+
+    </div>
+
+    <form name="delFormCharge" action="{% url 'unityapp.purchase_quotation_delete' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="sel_id" value="">
+    </form>
+
+     <form name="EscalateOrder" action="{% url 'unityapp.purchase_quotation_escalate' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="sel_id" value="">
+    </form>
+
+    
+    <script type="text/javascript">
+        function deleteVendorBook(id) {
+            document.forms['delFormCharge'].sel_id.value = id;
+            if (confirm('Are you sure you want to delete?')) {
+                document.forms['delFormCharge'].submit();
+            }
+        }
+
+      function escalateOrder(id) {
+            document.forms['EscalateOrder'].sel_id.value = id;
+            if (confirm('Are you sure you want to escalate?')) {
+                document.forms['EscalateOrder'].submit();
+            }
+        }
+        
+    </script>
+
+     <script type="text/javascript">
+        var selected = "{{category}}"
+        $('#asset-category-list li').each(function(){
+         if($(this).val() == parseInt(selected)){
+            $(this).addClass('active');
+         }
+       });
+    </script>
+
+{% endblock %}
+
+

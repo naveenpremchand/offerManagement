@@ -1,0 +1,143 @@
+{% extends "layout-app-new.html" %}
+{% load utils %}
+{% load mathfilters %}
+
+{% block breadcrumb %}
+    {% load breadcrumb_tags %}
+    {% clear_crumb %}
+    {% add_crumb 'Purchase'%}
+    {% render_breadcrumbs %}
+{% endblock %}
+{% block content %}
+<style>
+     #table_foot td{
+        border:none
+     }
+     .vendorBox p,.shipToaddress p{
+        padding: 0 20px;
+        color: #0099cc;
+        margin: 0;
+        width: 70%;
+    }
+    .vendorBox h3{
+        color: #0099cc;
+        font-weight: 700;
+        font-size: 15px;
+    }
+    .shipToaddress h3{
+        color: #0099cc;
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    .scroll {
+       width: 650px;
+       height: 200px;
+       overflow: scroll;
+    }
+    .scroll::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    .scroll::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+        border-radius: 10px;
+    }
+
+    .scroll::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+    }
+
+</style>
+
+<div class="purchaseRequestView">
+    <div class="container">
+        <h3 class="mainHead">{{ site.name }}</h3>
+        <p class="Addres">{{ site.siteprofile.caption }}</p>
+        {% if site.siteprofile.address %}
+            <p class="Addres">{{ site.siteprofile.address|safe }}</p><br>
+        {% endif %}
+        <h5 class="subHead">Purchase Quotation View</h5>
+        <div class="row">
+            <div class="col-md-5">
+              <div class="vendorBox">
+             <h3>Item Details</h3>
+                <div class="scroll">
+                    {{object.item_description|safe}}
+                </div>
+                </div>
+            </div>
+            <div class="col-md-2"></div>
+            <div class="col-md-5">
+                <div class="shipToaddress">
+                    <h3>Ship To</h3>
+                    <p>{{object.ship_to}}</p>
+                </div>
+
+            </div>
+        </div>
+        <div class="row" style="margin-top:20px;">
+            <table class="table">
+                <tr style="border-bottom:1px solid #ddd">
+                    <td><b>Required Date </b>: {{object.required_date}}</td>
+                    <td><b>Expense Account </b>: {{object.expence_account}}</td>
+                </tr>
+            </table>
+        </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><strong>List of Vendors</strong></h3>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <td><strong>Vendor Name</strong></td>
+                                    <td class="text-right"><strong>Quotation Amount</strong></td>
+                                    <td class="text-right"><strong>Attachment</strong></td>
+                                    <td class="text-right"></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- foreach ($order->lineItems as $line) or some such thing here -->
+                                {% for obj_vendor in purchase_quotation_details %}
+                                <tr>
+                                    <td>{{obj_vendor.vendor.name}}</td>
+                                    <td class="text-right">{{obj_vendor.quotation_amount}}</td>
+                                    <td class="text-right"> {% if obj_vendor.quotation_attachment %}<a href="{{ MEDIA_URL }}{{ obj_vendor.quotation_attachment }}"">
+                                      <span class="glyphicon glyphicon-paperclip"></span>
+                                    </a>{% endif %}</td>
+                                    <td class="text-right"><a href="{% url 'request_purchase_order_to_admin' object.id %}" class="btn btn-primary btn-sm">Approve</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="submit_container">
+            <div class="left">
+                {% if user|in_group:"admin"%}
+                    <div style="text-align:center">
+                        <a href="{% url 'unityapp.purchase_quotation_update' object.id %}" class="btn btn-primary">Edit</a>
+                    </div>
+                
+                {% endif %}
+            </div>
+          
+        </div>
+        <div class="row"></div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends "layout-app-new.html" %}
+{% load utils %}
+
+{% block breadcrumb %}
+    {% load breadcrumb_tags %}
+    {% clear_crumb %}
+    {% add_crumb 'Purchase'%}
+    {% render_breadcrumbs %}
+{% endblock %}
+{% block content %}
+
+<style type="text/css">
+    .alert-error{
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+        color: red;
+    }
+    .errorlist{
+        color:red!important;
+    }
+</style>
+
+<script type="text/javascript" src="{{STATIC_URL}}ckeditor/ckeditor/ckeditor.js"></script>
+<link href="{{STATIC_URL}}css/purchase_quotation.css" rel="stylesheet">
+
+<div class="page-header">
+    <h1>Update Purchase Quotation</h1>
+</div>
+
+<div class="container-fluid pr_form">
+<h4 class="pr_form_head">Item Details</h4>
+   <form method="post" action="" enctype="multipart/form-data" class="form-horizontal" id="purchase_quotation_form" name="purchase_quotation_form">
+
+    {% csrf_token %}
+    <div class="form-group pr_form">
+      <label class=" col-sm-4 pr_form_item_head">{{form.item_name.label}}</label>
+      <div class="col-sm-8">
+        {{form.item_name}}
+                  {{form.item_name.errors}}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="pr_form_item_head col-sm-4" >{{form.item_description.label}}</label>
+      <div class="col-sm-8">          
+        {{form.item_description}}
+                  {{form.item_description.errors}}
+      </div>
+    </div>
+        <div class="form-group">
+      <label class="pr_form_item_head col-sm-4" >{{form.quantity.label}}</label>
+      <div class="col-sm-8">          
+        {{form.quantity}}
+                  {{form.quantity.errors}}
+      </div>
+    </div>
+        <div class="form-group">
+      <label class="pr_form_item_head col-sm-4" >{{form.required_date.label}}</label>
+      <div class="col-sm-8">          
+       {{form.required_date}}
+                  {{form.required_date.errors}}
+      </div>
+    </div>
+        <div class="form-group">
+      <label class="pr_form_item_head col-sm-4" >{{form.expence_account.label}}</label>
+      <div class="col-sm-8">          
+         {{form.expence_account}}
+                  {{form.expence_account.errors}}
+      </div>
+    </div>
+        <div class="form-group">
+      <label class="pr_form_item_head col-sm-4" >{{form.ship_to.label}}</label>
+      <div class="col-sm-8">          
+       <textarea cols="40" id="id_ship_to" name="ship_to" rows="5" class="form-control">{{request.site.name}},{{ site.siteprofile.address|safe }}</textarea>
+                 {{form.ship_to.errors}}
+      </div>
+    </div>
+   
+  
+
+<h4 class="pr_form_head">Add Vendor</h4>
+
+<!-- vendor selection -->
+<div class="col-lg-12">
+    {{ purchase_quotation_formset.management_form }}
+
+    {% define 0 as loop_count %}
+    {% for form in purchase_quotation_formset.forms %}
+        {{form.id}}
+        {% define loop_count|add:"1" as loop_count %}
+      
+        <div class='table pr_form'>
+            {% for field in form.visible_fields %}
+                {% if field.label != 'Delete' %}
+                   <div class="row">
+                        <div class="col-md-4" style="font-weight:bold;text-align: left;padding-top: 12px;">
+                        {{field.label}} {% if field.field.required %}<sup>*</sup>{% endif %}
+                        </div>
+                         <div class="col-md-8">
+                        {{field}}
+                        {{field.errors}}
+                        {% if forloop.counter|divisibleby:4 or forloop.last %}
+                        
+                        <img style= "{% if loop_count <= 1 %}display:none;{% endif %}margin-left:15cm;width:15px;height:15px;cursor:pointer;" id="delete-{{forloop.parentloop.counter|add:'-1'}}-item" name="delete-3-items" style="width:15px;height:15px;cursor:pointer;" src="{{STATIC_URL}}img/delete.png" onclick="deleteOption({{forloop.parentloop.counter|add:'-1'}});" title="Delete Option" >
+                    {% endif %}
+
+                        </div>
+                    </div>
+              
+                   
+                {% endif %}
+                
+            {% endfor %}
+
+        </div>
+    {% endfor %}
+
+
+</div>
+
+    <div class="container-fluid pr_submit">
+          <button name="pr_btn_vendor_add" type="button" class="btn btn-info" id="pr_btn_vendor_add" href="javascript:void(0);">Add another vendor</button>
+    </div>
+
+
+<div class="container-fluid pr_form" style="margin-bottom:20px;">
+<h4 class="pr_form_head">Select Approvers</h4>
+ 
+    {% for level in lst_levels %} 
+    
+    {% if forloop.first %}
+       <div class="row">
+      {% endif %}
+      
+      <div class="col-lg-3 pr_checkbox">
+        <label class="checkbox-inline ">
+        <input type="checkbox" name="level" value="{{level.1}}"  {% if level.1 in saved_levels %} checked="true" {% endif %} style="height:20px;width: 20px;"><p class="pr_checkbox_box">Approver {{level.0}} </p>
+        </label>
+    
+      </div>
+
+    {% if forloop.counter|divisibleby:6 or forloop.last %}
+      </div>{% if not forloop.last  %}<div class="row"> {% endif %}
+    {% endif %}
+
+
+      {% endfor %}
+      </div>
+      </div>
+
+</div>
+
+    <div class="container-fluid pr_submit">
+    <button name="PurchaseQuotationSave" class="btn btn-info" id="pr_btn" type="submit">Save</button>
+    <button name="" class="btn btn-info" id="pr_btn">Reset</button>
+    </div>
+
+    </form>
+
+  </div>
+
+
+
+<script type="text/javascript">
+    $('#pr_btn_vendor_add').click(function() {
+        cloneMore('.table:last', 'vendorpurchaserequestdetails_set');
+    });
+</script>
+
+<script>
+    function cloneMore(selector, type) {
+        var newElement = $(selector).clone(true);
+        var total = $('#id_' + type + '-TOTAL_FORMS').val();
+        newElement.find(':input').each(function() {
+            var name = $(this).attr('name').replace('-' + (total-1) + '-','-' + total + '-');
+            var id = 'id_' + name;
+            $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+            $(this).removeAttr('selected');
+        });
+        newElement.find('label').each(function() {
+            var newFor = $(this).attr('for').replace('-' + (total-1) + '-','-' + total + '-');
+            $(this).attr('for', newFor);
+        });
+        total++;
+
+        newElement.find('img').show()
+        newElement.find('img').attr('id', 'delete-'+total+'-item')
+        newElement.find('img').attr('name', 'delete-'+total+'-items')
+        newElement.find('img').attr("onclick","deleteOption('"+total+"')");
+        newElement.find(':input').attr('value','')
+
+        newElement.find(':input').removeAttr("value")
+
+
+        $('#id_' + type + '-TOTAL_FORMS').val(total);
+        $(selector).after(newElement);
+    }
+
+    function deleteOption(loop){
+           if (confirm('Are you sure you want to delete this option?')) {
+               var parentDiv = $("#delete-"+loop+"-item").parent().parent().parent()
+               parentDiv.remove()
+
+           }
+           var total = $('#id_vendorpurchaserequestdetails_set-TOTAL_FORMS').val();
+          return false
+          
+        }
+
+   
+</script>
+
+{% endblock %}
+
